@@ -2,14 +2,17 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from gensim.models import word2vec
+from collections import defaultdict, Counter
 from sklearn.cluster import AffinityPropagation
-from collections import defaultdict
 
 
 class Clusterer:
 
-    def __init__(self, w2v):
-        self.wmodel = word2vec.Word2Vec.load_word2vec_format(w2v, binary=True)
+    def __init__(self, wmodel):
+        if isinstance(wmodel, word2vec.Word2Vec):
+            self.wmodel = wmodel
+        else:
+            self.wmodel = word2vec.Word2Vec.load_word2vec_format(wmodel, binary=True)
 
 
     def cluster_props(self, props):
@@ -33,6 +36,21 @@ class Clusterer:
             word = visual[idx]
             ret[cluster_id].append(word)
         return ret
+
+    def get_centroid(self, cdict):
+        centroids = {}
+        for key in cdict.keys():
+            s = Counter(cdict[key]).most_common(2)
+            centroid = s[0][0]
+            try:
+                if s[0][1] == s[-1][1] or s[0][1] < 5:
+                    centroid = sorted([(x, self.wmodel.vocab[x].count)\
+                                       for x in cdict[key]],
+                                      key=lambda x: x[1], reverse=True)[0][0]
+            except:
+                centroid = s[0][0]
+            centroids[key] = centroid
+        return centroids
 
 
     def predict(self, model, word):

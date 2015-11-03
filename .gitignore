@@ -57,8 +57,13 @@ docs/_build/
 # PyBuilder
 target/
 
+# Vim swap files
+*.swp
+.*.swp
+
 # Models and RPC
 crf/
 word2vec/
 morphs.py
 crf.*
+*ni_tagger.py
