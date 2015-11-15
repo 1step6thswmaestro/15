@@ -12,7 +12,7 @@ from sentiment import SentimentTagger
 
 def test_tagging():
     a = SentimentTagger('crf/crf.model')
-    assert len(a.label_sentence_multi(
+    b = a.label_sentence_multi(
         [[u'\ub514\uc790\uc778/NNG',
         u'\uad1c\ucc2e/VA',
         u'\uad6c/EC',
@@ -158,7 +158,11 @@ def test_tagging():
         u'\ud558/XSV',
         u'\u3142\ub2c8\ub2e4/EF',
         u'./SF']]
-    )) == 2
+    )
+
+    assert len(b) == 2
+    assert sum([int(x[1] == 'P') + int(x[1] == 'N') for x in b[0]]) > 0
+    assert sum([int(x[1] == 'P') + int(x[1] == 'N') for x in b[1]]) > 0
 
 
 if __name__ == '__main__':

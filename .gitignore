@@ -62,8 +62,9 @@ target/
 .*.swp
 
 # Models and RPC
-crf/
-word2vec/
-morphs.py
-crf.*
-*ni_tagger.py
+api_server/crf/
+api_server/word2vec/
+api_server/morphs.py
+api_server/crf.*
+api_server/*ni_tagger.py
+api_server/data/

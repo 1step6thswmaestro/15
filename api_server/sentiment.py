@@ -5,8 +5,9 @@ import uuid
 
 class SentimentTagger:
 
-    def __init__(self, model_fn):
-        self.model_fn = model_fn
+    def __init__(self, model_file, template_type=1):
+        self.model_file = model_file
+        self.template_type = template_type
 
 
     def test_model(self, data, test_fn='crf.test', test_out_fn='crf.test.out',\
@@ -20,16 +21,22 @@ class SentimentTagger:
         fout = file('crf/' + test_fn, 'w')
         for sentence in data:
             for word in sentence:
-                if isinstance(word[0], unicode):
-                    print >> fout, "\t".join(list(word[0].split('/'))+\
-                                             [word[1]]).encode('utf-8')
+                if self.template_type == 2:
+                    if isinstance(word[0], unicode):
+                        print >> fout, "\t".join(list(word[0].split('/'))+\
+                                                 [word[1]]).encode('utf-8')
+                    else:
+                        print >> fout, "\t".join(list(word[0].split('/'))+[word[1]])
                 else:
-                    print >> fout, "\t".join(list(word[0].split('/'))+[word[1]])
+                    if isinstance(word[0], unicode):
+                        print >> fout, "\t".join(word).encode('utf-8')
+                    else:
+                        print >> fout, "\t".join(word)
             print >> fout, ''
         fout.close()
         
         from os import system, remove
-        test_cmd = 'crf_test -m %s %s > %s' % (self.model_fn, 'crf/' + test_fn,\
+        test_cmd = 'crf_test -m %s %s > %s' % (self.model_file, 'crf/' + test_fn,\
                                                test_out_fn)
         print 'Executing %s' % test_cmd
         system(test_cmd)
@@ -38,12 +45,13 @@ class SentimentTagger:
         fin = file(test_out_fn, 'r')
         cross = [[0,0], [0,0]]
         tagged = []; temp = []
+        columns = 3 + int(self.template_type == 2)
         
         for _line in fin:
             
             line = _line.decode('utf-8').split()
 
-            if len(line) != 4:
+            if len(line) != columns:
                 tagged.append(temp)
                 temp = []
                 continue
@@ -97,16 +105,30 @@ class SentimentTagger:
         if not isinstance(sentence, list):
             sentence = sentence.split()
 
-        return [("/".join(x[:2]),x[3]) for x in \
-                self.test_model([zip(sentence, ['O']*len(sentence))],
-                    test_fn=str(uuid.uuid1()), test_out_fn=str(uuid.uuid1()),
-                    remove_after=True)['tagged'][0]]
+        if self.template_type == 2:
+            return [("/".join(x[:2]),x[3]) for x in \
+                    self.test_model([zip(sentence, ['O']*len(sentence))],
+                        test_fn=str(uuid.uuid1()), test_out_fn=str(uuid.uuid1()),
+                        remove_after=True)['tagged'][0]]
+        else:
+            return [(x[0],x[2]) for x in \
+                    self.test_model([zip(sentence, ['O']*len(sentence))],
+                        test_fn=str(uuid.uuid1()), test_out_fn=str(uuid.uuid1()),
+                        remove_after=True)['tagged'][0]]
 
 
     def label_sentence_multi(self, sentences):
-        return [[("/".join(x[:2]),x[3]) for x in review]\
-                for review in self.test_model([zip(s, ['O']*len(s))\
-                for s in sentences],\
-                remove_after=True,\
-                test_fn=str(uuid.uuid1()),\
-                test_out_fn=str(uuid.uuid1()))['tagged']]
+        if self.template_type == 2:
+            return [[("/".join(x[:2]),x[3]) for x in review]\
+                    for review in self.test_model([zip(s, ['O']*len(s))\
+                    for s in sentences],
+                    remove_after=True,
+                    test_fn=str(uuid.uuid1()),
+                    test_out_fn=str(uuid.uuid1()))['tagged']]
+        else:
+            return [[(x[0], x[2]) for x in review]\
+                    for review in self.test_model([zip(s, ['O']*len(s))\
+                    for s in sentences],
+                    remove_after=True,
+                    test_fn=str(uuid.uuid1()),
+                    test_out_fn=str(uuid.uuid1()))['tagged']]

@@ -12,7 +12,7 @@ import json
 
 
 def test_summary(api_server):
-    data = json.loads(r.get('http://1.lucent.me:5000/v1/products/5599916904/summary').text)
+    data = json.loads(r.get('http://soma.lucent.me:5555/v1/products/5599916904/summary').text)
     assert data.get('attributes') is not None
     assert len(data['attributes']) > 8
     assert data['attributes'][0].get('rate') is not None
@@ -43,7 +43,7 @@ def test_summary(api_server):
 
 
 def test_reviews(api_server):
-    data = json.loads(r.get('http://1.lucent.me:5000/v1/products/5599916904/reviews').text)
+    data = json.loads(r.get('http://soma.lucent.me:5555/v1/products/5599916904/reviews').text)
     assert isinstance(data, list)
     assert len(data) > 0
     length = len(data)
