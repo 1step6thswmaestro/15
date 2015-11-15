@@ -2,3 +2,6 @@
     path = soma06-2-web-client
     url = https://github.com/soma06-2/soma06-2-web-client
 
+[submodule "soma0612"]
+    path = api-server
+    url = https://github.com/jeonhyojun/soma0612
