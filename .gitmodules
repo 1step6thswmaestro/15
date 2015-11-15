@@ -1,0 +1,4 @@
+[submodule "soma06-2-web-client"]
+    path = soma06-2-web-client
+    url = https://github.com/soma06-2/soma06-2-web-client
+
